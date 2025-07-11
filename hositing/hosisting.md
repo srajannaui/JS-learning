@@ -75,7 +75,8 @@ sayHi(); // TypeError: sayHi is not a function
 var sayHi = function() {
   console.log("Hi");
 };
+
+```
 ✅ Explanation:
 var sayHi is hoisted and initialized to undefined.
 When you try to invoke it before assignment, it results in TypeError.
-```
