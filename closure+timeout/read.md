@@ -46,6 +46,7 @@ for (let i = 1; i <= 3; i++) {
 1
 2
 3
+
 ✅ Explanation:
 
 let is block-scoped, so a new i is created for each iteration.
@@ -69,6 +70,7 @@ for (var i = 1; i <= 3; i++) {
 1
 2
 3
+
 ✅ Explanation:
 
 The IIFE creates a new scope for each iteration.
@@ -90,10 +92,10 @@ for (let i = 1; i <= 3; i++) {
 
 ### 🔹 Summary :
 
-# 🔔 Closures combined with setTimeout demonstrate how asynchronous callbacks can "remember" the scope in which they were defined.
+🔔 Closures combined with setTimeout demonstrate how asynchronous callbacks can "remember" the scope in which they were defined.
 
-# When using var, the same i is shared across all callbacks ⇒ they all log 4.
+When using var, the same i is shared across all callbacks ⇒ they all log 4.
 
-# Use let for block scoping or an IIFE to capture the correct value of i for each iteration.
+Use let for block scoping or an IIFE to capture the correct value of i for each iteration.
 
-# Modern JavaScript prefers let or const in for loops for this pattern.
+Modern JavaScript prefers let or const in for loops for this pattern.

@@ -109,6 +109,32 @@ count is private to the counter function.
 The returned object’s methods (increment, decrement) form closures over count and can manipulate it.
 
 No direct access to count from outside ⇒ achieves data encapsulation.
+```javascript
+function Counter() {
+  this.count = 0;
+
+  this.increment = function() {
+    this.count++;
+    console.log(this.count);
+  };
+
+  this.decrement = function() {
+    this.count--;
+    console.log(this.count);
+  };
+}
+
+// Usage:
+const c = new Counter();
+c.increment();  // 1
+c.increment();  // 2
+c.decrement();  // 1
+```
+✅ Explanation:
+
+this.count belongs to the instance created by new Counter().
+
+increment and decrement access this.count.
 
 ## 🔹 Why are closures useful?
 ✅ Common use-cases:
