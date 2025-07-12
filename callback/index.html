@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Closure-based Button Click Counter</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+    }
+    p {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="clickBtn">Click Me!</button>
+  <p id="counter">Button clicked 0 times.</p>
+
+  <script>
+    (function() {
+      const button = document.getElementById('clickBtn');
+      const counter = document.getElementById('counter');
+
+      // Closure encapsulation
+      function createClickCounter() {
+        let count = 0; // Private variable in closure
+
+        return function() {
+          count++;
+          counter.textContent = `Button clicked ${count} ${count === 1 ? 'time' : 'times'}.`;
+        };
+      }
+
+      const handleClick = createClickCounter(); // `handleClick` closes over `count`
+
+      button.addEventListener('click', handleClick);
+    })();
+  </script>
+
+</body>
+</html>
