@@ -1,8 +1,8 @@
-JavaScript Execution in the Browser — Diagram Explanation
+# JavaScript Execution in the Browser
 
 This README explains the flow of how JavaScript executes in a browser environment, referencing the accompanying diagram (compressed_diagram.png).
 
-🔹 Overview of the diagram
+## 🔹 Overview of the diagram
 
 The diagram illustrates the key components involved when a user types a URL and the browser begins executing JavaScript:
 
@@ -62,56 +62,149 @@ Event Loop moves callbacks into Call Stack when ready.
 
 4️⃣ Rendering updates, console logs, DOM manipulations, storage access, etc., occur during this process.
 
+## 🔹 What is the Microtask Queue?
 
-🔔 Explanation for mircrotask.js :
-✅ What happens step-by-step:
+The Microtask Queue (also called Job Queue) holds tasks that should be executed immediately after the current script execution and before any Macrotasks (e.g., setTimeout).
 
-1️⃣ console.log('Script start') — synchronous → prints immediately
-2️⃣ setTimeout(...) scheduled → callback goes into Macrotask Queue (Callback Queue)
-3️⃣ Promise.resolve().then(...) scheduled → callback goes into Microtask Queue
-4️⃣ queueMicrotask(...) scheduled → goes into Microtask Queue
-5️⃣ console.log('Script end') — synchronous → prints immediately
+In JavaScript, Microtasks have higher priority than Macrotasks.Once the current synchronous code completes, the Event Loop drains the entire Microtask Queue before moving to the next Macrotask.
 
-🔔 After script execution completes:
+🔹 What goes into the Microtask Queue?
 
-👉 The Event Loop runs all Microtasks before any Macrotask:
+✅ Common sources of Microtasks:
 
-Promise.then callback → prints
+Promise.then(), Promise.catch(), Promise.finally() callbacks
 
-queueMicrotask callback → prints
+queueMicrotask() callbacks
 
-👉 Then it picks next Macrotask:
+MutationObserver callbacks
 
-setTimeout callback → prints
+❌ Examples of what does NOT go into the Microtask Queue:
 
-✅ Key takeaway (interview-ready summary):
+setTimeout and setInterval (Macrotasks)
 
-Microtasks (e.g., Promise.then, queueMicrotask) are executed after the current script and before any Macrotask (like setTimeout).
+requestAnimationFrame (Macrotask)
 
-Macrotasks (callback queue tasks) wait for the Microtask Queue to drain before running.
+UI events (Macrotasks)
+
+🔹 Example: Microtask vs Macrotask order
+
+```javascript
+
+console.log('Script start');
+
+setTimeout(() => {
+  console.log('Macrotask: setTimeout callback');
+}, 0);
+
+Promise.resolve().then(() => {
+  console.log('Microtask: Promise.then callback');
+});
+
+queueMicrotask(() => {
+  console.log('Microtask: queueMicrotask callback');
+});
+
+console.log('Script end');
+```
+
+🔔 Expected Output:
+
+Script start
+Script end
+Microtask: Promise.then callback
+Microtask: queueMicrotask callback
+Macrotask: setTimeout callback
+
+✅ Explanation:
+
+Promise.then and queueMicrotask callbacks run before setTimeout callback because the Microtask Queue is drained entirely before processing the next Macrotask.
+
+🔹 Summary (Interview-friendly answer):
+
+🔔 The Microtask Queue is a queue where high-priority asynchronous callbacks (like Promise handlers) are stored and executed immediately after the current synchronous code and before any Macrotasks (like setTimeout).
+
+✅ Key points to remember:
+
+Microtasks have priority over Macrotasks.
+
+The Event Loop ensures that all Microtasks are completed before moving to the next Macrotask.
+
+Examples of Microtasks: Promise.then, queueMicrotask, MutationObserver.
 
 
-🔹 What is Starvation?
+## 🔹 What is Starvation?
 
-👉 Starvation occurs when a task is perpetually prevented from executing because other higher-priority tasks keep running and blocking it from progressing.
+Starvation occurs when a task is perpetually blocked from execution because other higher-priority tasks continuously occupy the event loop.
 
-In JavaScript, this can happen when:
+In JavaScript:
 
-The Microtask Queue keeps getting filled with new microtasks faster than they can drain, preventing the Event Loop from ever reaching the Callback Queue (Macrotasks) ⇒ effectively starving macrotasks like setTimeout.
+Microtasks (e.g., Promise callbacks) have higher priority than Macrotasks (e.g., setTimeout).
 
-✅ What happens in starvation.js :
+If the Microtask Queue keeps filling up faster than it can be drained, the Event Loop may never get to the Callback Queue (Macrotask Queue).
 
-recursiveMicrotask continuously schedules itself as a new microtask.
+This means tasks like setTimeout callbacks could be indefinitely delayed ⇒ starvation.
 
-The Event Loop never gets a chance to return to the Callback Queue (macrotasks like setTimeout).
+🔹 Example of Starvation in JavaScript
 
-As a result, the setTimeout callback is starved indefinitely.
+```javascript
 
-🔹 📖 Explanation (interview-friendly summary):
-🔔 Starvation in JavaScript occurs when the Event Loop is constantly occupied with higher-priority tasks (like microtasks), preventing lower-priority tasks (like macrotasks) from executing.
+console.log('Script start');
 
-Example scenario:
+setTimeout(() => {
+  console.log('Macrotask: setTimeout callback');
+}, 0);
 
-Recursive Promise.then() calls keep adding new microtasks faster than they can complete.
+function recursiveMicrotask() {
+  Promise.resolve().then(() => {
+    console.log('Microtask: recursive promise');
+    recursiveMicrotask();  // Recursively schedules another microtask
+  });
+}
 
-This prevents the Event Loop from processing setTimeout or UI updates ⇒ starvation of macrotasks.
+recursiveMicrotask();
+
+console.log('Script end');
+```
+
+🔔 Expected Output:
+
+Script start
+Script end
+Microtask: recursive promise
+Microtask: recursive promise
+Microtask: recursive promise
+... (infinite)
+
+🔹 Explanation:
+
+✅ Step-by-step breakdown:
+
+1️⃣ console.log('Script start') runs synchronously.
+
+2️⃣ setTimeout(..., 0) schedules a macrotask in the Callback Queue.
+
+3️⃣ recursiveMicrotask() is invoked:
+
+Inside it, a Promise resolves and schedules a .then() callback in the Microtask Queue.
+
+After the current script finishes (Script end), the Event Loop begins draining the Microtask Queue.
+
+Each time it executes recursiveMicrotask(), it adds a new microtask before returning to the Event Loop.
+
+🔔 Result:
+
+The Event Loop never reaches the Callback Queue where setTimeout lives because the Microtask Queue never empties ⇒ setTimeout is starved.
+
+🔹 Summary (Interview-friendly answer):
+
+🔔 Starvation in JavaScript occurs when the Event Loop is constantly busy processing higher-priority tasks (Microtasks) that continuously refill the queue, preventing lower-priority tasks (Macrotasks) like setTimeout from executing.
+
+Common causes:
+
+Excessive recursive scheduling of Promises.
+
+Poor design where asynchronous tasks flood the Microtask Queue.
+
+✅ Key takeaway:
+
+Understand the priority: Microtask Queue drains completely before processing the next Macrotask ⇒ beware of infinite or heavy microtask chains causing starvation.
