@@ -61,3 +61,57 @@ Their callbacks are pushed to the Callback Queue.
 Event Loop moves callbacks into Call Stack when ready.
 
 4️⃣ Rendering updates, console logs, DOM manipulations, storage access, etc., occur during this process.
+
+
+🔔 Explanation for mircrotask.js :
+✅ What happens step-by-step:
+
+1️⃣ console.log('Script start') — synchronous → prints immediately
+2️⃣ setTimeout(...) scheduled → callback goes into Macrotask Queue (Callback Queue)
+3️⃣ Promise.resolve().then(...) scheduled → callback goes into Microtask Queue
+4️⃣ queueMicrotask(...) scheduled → goes into Microtask Queue
+5️⃣ console.log('Script end') — synchronous → prints immediately
+
+🔔 After script execution completes:
+
+👉 The Event Loop runs all Microtasks before any Macrotask:
+
+Promise.then callback → prints
+
+queueMicrotask callback → prints
+
+👉 Then it picks next Macrotask:
+
+setTimeout callback → prints
+
+✅ Key takeaway (interview-ready summary):
+
+Microtasks (e.g., Promise.then, queueMicrotask) are executed after the current script and before any Macrotask (like setTimeout).
+
+Macrotasks (callback queue tasks) wait for the Microtask Queue to drain before running.
+
+
+🔹 What is Starvation?
+
+👉 Starvation occurs when a task is perpetually prevented from executing because other higher-priority tasks keep running and blocking it from progressing.
+
+In JavaScript, this can happen when:
+
+The Microtask Queue keeps getting filled with new microtasks faster than they can drain, preventing the Event Loop from ever reaching the Callback Queue (Macrotasks) ⇒ effectively starving macrotasks like setTimeout.
+
+✅ What happens in starvation.js :
+
+recursiveMicrotask continuously schedules itself as a new microtask.
+
+The Event Loop never gets a chance to return to the Callback Queue (macrotasks like setTimeout).
+
+As a result, the setTimeout callback is starved indefinitely.
+
+🔹 📖 Explanation (interview-friendly summary):
+🔔 Starvation in JavaScript occurs when the Event Loop is constantly occupied with higher-priority tasks (like microtasks), preventing lower-priority tasks (like macrotasks) from executing.
+
+Example scenario:
+
+Recursive Promise.then() calls keep adding new microtasks faster than they can complete.
+
+This prevents the Event Loop from processing setTimeout or UI updates ⇒ starvation of macrotasks.
